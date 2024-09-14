@@ -2,81 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>FastScalper Trading Interface</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FastScalper</title>
   <link href="./styles.css" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-white">
-  <div class="container mx-auto p-4">
-    <div class="bg-gray-800 p-4 rounded">
-      <h2 class="text-2xl mb-4">FastScalper</h2>
-      <div class="grid grid-cols-3 gap-4">
-        <!-- Symbol Input -->
-        <div>
-          <label for="symbol" class="block">Symbol:</label>
-          <input type="text" id="symbol" class="w-full p-2 bg-gray-700 rounded" value="BHEL">
-        </div>
-        <!-- Quantity Input -->
-        <div>
-          <label for="quantity" class="block">Quantity:</label>
-          <input type="number" id="quantity" class="w-full p-2 bg-gray-700 rounded" value="1">
-        </div>
-        <!-- Settings Button -->
-        <div class="flex items-end">
-          <button id="settingsButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-            Settings
-          </button>
-        </div>
-      </div>
-      <!-- Trading Buttons -->
-      <div class="grid grid-cols-4 gap-4 mt-4">
-        <button id="leButton" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-          LE
-        </button>
-        <button id="lxButton" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
-          LX
-        </button>
-        <button id="seButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">
-          SE
-        </button>
-        <button id="sxButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-          SX
-        </button>
-      </div>
+<body>
+  <div id="app">
+    <h1>FastScalper</h1>
+    <div class="input-group">
+      <label for="symbol">Symbol:</label>
+      <input type="text" id="symbol" value="BHEL">
+    </div>
+    <div class="input-group">
+      <label for="quantity">Quantity:</label>
+      <input type="number" id="quantity" value="1">
+    </div>
+    <button id="settingsButton">Settings</button>
+    <div class="button-group">
+      <button id="leButton">LE</button>
+      <button id="lxButton">LX</button>
+      <button id="seButton">SE</button>
+      <button id="sxButton">SX</button>
     </div>
   </div>
 
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-    <div class="bg-gray-800 p-4 rounded">
-      <h3 class="text-xl mb-4">Settings</h3>
-      <div class="grid grid-cols-2 gap-4">
-        <!-- API Key -->
-        <div>
-          <label for="apiKey" class="block">API Key:</label>
-          <input type="text" id="apiKey" class="w-full p-2 bg-gray-700 rounded">
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <h2>Settings</h2>
+      <div class="settings-form">
+        <div class="input-group">
+          <label for="apiKey">API Key:</label>
+          <input type="text" id="apiKey">
         </div>
-        <!-- Exchange -->
-        <div>
-          <label for="exchange" class="block">Exchange:</label>
-          <select id="exchange" class="w-full p-2 bg-gray-700 rounded">
-            <!-- Options will be populated by JavaScript -->
-          </select>
+        <div class="input-group">
+          <label for="exchange">Exchange:</label>
+          <select id="exchange"></select>
         </div>
-        <!-- Product -->
-        <div>
-          <label for="product" class="block">Product:</label>
-          <select id="product" class="w-full p-2 bg-gray-700 rounded">
-            <!-- Options will be populated by JavaScript -->
-          </select>
+        <div class="input-group">
+          <label for="product">Product:</label>
+          <select id="product"></select>
         </div>
       </div>
-      <div class="flex justify-end mt-4">
-        <button id="saveSettings" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-2">
-          Save
-        </button>
-        <button id="cancelSettings" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
-          Cancel
-        </button>
+      <div class="settings-buttons">
+        <button id="okSettings">OK</button>
+        <button id="cancelSettings">Cancel</button>
       </div>
     </div>
   </div>

@@ -7,7 +7,7 @@ document.getElementById('sxButton').addEventListener('click', () => trade('BUY',
 document.getElementById('settingsButton').addEventListener('click', openSettings);
 
 let settings = {
-  apiKey: 'xxxxxx',
+  apiKey: '',
   exchange: 'NSE',
   product: 'MIS',
 };
@@ -43,8 +43,10 @@ function trade(action, isEntry) {
 
 function openSettings() {
   const modal = document.getElementById('settingsModal');
-  modal.classList.remove('hidden', 'flex');
-  modal.classList.add('flex');
+  modal.style.display = 'block';
+  setTimeout(() => {
+    modal.classList.add('show');
+  }, 10);
 
   // Populate current settings
   document.getElementById('apiKey').value = settings.apiKey;
@@ -52,7 +54,15 @@ function openSettings() {
   document.getElementById('product').value = settings.product;
 }
 
-document.getElementById('saveSettings').addEventListener('click', () => {
+function closeSettings() {
+  const modal = document.getElementById('settingsModal');
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 300);
+}
+
+document.getElementById('okSettings').addEventListener('click', () => {
   settings.apiKey = document.getElementById('apiKey').value;
   settings.exchange = document.getElementById('exchange').value;
   settings.product = document.getElementById('product').value;
@@ -60,14 +70,10 @@ document.getElementById('saveSettings').addEventListener('click', () => {
   // Save settings to localStorage
   localStorage.setItem('fastscalperSettings', JSON.stringify(settings));
 
-  const modal = document.getElementById('settingsModal');
-  modal.classList.add('hidden');
+  closeSettings();
 });
 
-document.getElementById('cancelSettings').addEventListener('click', () => {
-  const modal = document.getElementById('settingsModal');
-  modal.classList.add('hidden');
-});
+document.getElementById('cancelSettings').addEventListener('click', closeSettings);
 
 // Populate exchange and product options
 const exchanges = ['NSE', 'NFO', 'CDS', 'BSE', 'BFO', 'BCD', 'MCX', 'NCDEX'];
@@ -92,3 +98,18 @@ products.forEach((product) => {
 // Set initial values from settings
 exchangeSelect.value = settings.exchange;
 productSelect.value = settings.product;
+
+// Close the modal if clicking outside of it
+window.onclick = function(event) {
+  const modal = document.getElementById('settingsModal');
+  if (event.target == modal) {
+    closeSettings();
+  }
+};
+
+// Add keydown event listener to close modal on Escape key press
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeSettings();
+  }
+});
