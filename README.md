@@ -3,7 +3,7 @@
 
 FastScalper is a lightweight, cross-platform desktop application built with [Tauri](https://tauri.app/) and styled using custom CSS. It provides a streamlined interface for placing automated trading orders through the OpenAlgo API.
 
-![FastScalper Screenshot](./)
+![FastScalper Screenshot](./screenshot.png)
 
 ## Table of Contents
 
@@ -246,7 +246,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## Acknowledgments
 
 - [Tauri](https://tauri.app/) for providing the framework to build cross-platform desktop applications.
-- [OpenAlgo](https://github.com/openalgo/openalgo) for the trading API.
+- [OpenAlgo](https://github.com/marketcalls/openalgo) for the trading API.
 - All contributors and the open-source community.
 
 ## Contact
