@@ -43,10 +43,7 @@ function trade(action, isEntry) {
 
 function openSettings() {
   const modal = document.getElementById('settingsModal');
-  modal.style.display = 'block';
-  setTimeout(() => {
-    modal.classList.add('show');
-  }, 10);
+  modal.style.display = 'flex';
 
   // Populate current settings
   document.getElementById('apiKey').value = settings.apiKey;
@@ -56,10 +53,7 @@ function openSettings() {
 
 function closeSettings() {
   const modal = document.getElementById('settingsModal');
-  modal.classList.remove('show');
-  setTimeout(() => {
-    modal.style.display = 'none';
-  }, 300);
+  modal.style.display = 'none';
 }
 
 document.getElementById('okSettings').addEventListener('click', () => {

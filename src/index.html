@@ -8,16 +8,17 @@
 </head>
 <body>
   <div id="app">
-    <h1>FastScalper</h1>
-    <div class="input-group">
-      <label for="symbol">Symbol:</label>
-      <input type="text" id="symbol" value="BHEL">
+    <div class="input-container">
+      <div class="input-group">
+        <label for="symbol">Symbol:</label>
+        <input type="text" id="symbol" value="BHEL">
+      </div>
+      <div class="input-group">
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" value="1">
+      </div>
+      <button id="settingsButton">Settings</button>
     </div>
-    <div class="input-group">
-      <label for="quantity">Quantity:</label>
-      <input type="number" id="quantity" value="1">
-    </div>
-    <button id="settingsButton">Settings</button>
     <div class="button-group">
       <button id="leButton">LE</button>
       <button id="lxButton">LX</button>
@@ -34,13 +35,15 @@
           <label for="apiKey">API Key:</label>
           <input type="text" id="apiKey">
         </div>
-        <div class="input-group">
-          <label for="exchange">Exchange:</label>
-          <select id="exchange"></select>
-        </div>
-        <div class="input-group">
-          <label for="product">Product:</label>
-          <select id="product"></select>
+        <div class="parallel-inputs">
+          <div class="input-group">
+            <label for="exchange">Exchange:</label>
+            <select id="exchange"></select>
+          </div>
+          <div class="input-group">
+            <label for="product">Product:</label>
+            <select id="product"></select>
+          </div>
         </div>
       </div>
       <div class="settings-buttons">
