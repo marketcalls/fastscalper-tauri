@@ -31,9 +31,19 @@
     <div class="modal-content">
       <h2>Settings</h2>
       <div class="settings-form">
-        <div class="input-group">
-          <label for="apiKey">API Key:</label>
-          <input type="text" id="apiKey">
+        <div class="compact-row">
+          <div class="input-group">
+            <label for="apiKey">API Key:</label>
+            <input type="text" id="apiKey">
+          </div>
+          <div class="input-group">
+            <label for="hostUrl">Host URL:</label>
+            <input type="text" id="hostUrl" placeholder="http://127.0.0.1:5000">
+          </div>
+          <div class="input-group checkbox-group">
+            <input type="checkbox" id="voiceAlerts">
+            <label for="voiceAlerts">Voice Alerts</label>
+          </div>
         </div>
         <div class="parallel-inputs">
           <div class="input-group">

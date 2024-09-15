@@ -14,6 +14,7 @@ struct TradeDetails {
   api_key: String,
   exchange: String,
   product: String,
+  host_url: String,
 }
 
 #[tauri::command]
@@ -31,8 +32,10 @@ async fn place_order(trade_details: TradeDetails) -> Result<String, String> {
     "position_size": "0"
   });
 
+  let endpoint = format!("{}/api/v1/placesmartorder", trade_details.host_url);
+
   let response = client
-    .post("http://127.0.0.1:5000/api/v1/placesmartorder")
+    .post(&endpoint)
     .json(&payload)
     .send()
     .await

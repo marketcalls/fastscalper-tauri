@@ -112,8 +112,8 @@ input, select {
   background-color: var(--bg-color);
   padding: 20px;
   border: 1px solid #888;
-  width: 300px;
-  max-width: 80%;
+  width: 360px;
+  max-width: 90%;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -128,17 +128,38 @@ input, select {
 
 .settings-form label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
+  font-size: 12px;
 }
 
 .settings-form input,
 .settings-form select {
   width: 100%;
-  padding: 5px;
+  padding: 4px;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+/* Styles for compact row */
+.compact-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
   margin-bottom: 10px;
 }
 
-/* New styles for parallel inputs */
+.compact-row .input-group {
+  flex: 1;
+  margin-right: 0;
+}
+
+.compact-row input[type="text"],
+.compact-row input[type="url"] {
+  width: 100%;
+}
+
+/* Styles for parallel inputs */
 .parallel-inputs {
   display: flex;
   justify-content: space-between;
@@ -154,17 +175,37 @@ input, select {
   width: 100%;
 }
 
+/* Styles for checkbox group */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-top: 0;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 5px;
+}
+
+.checkbox-group label {
+  margin-bottom: 0;
+  font-size: 12px;
+}
+
 .settings-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 #okSettings, #cancelSettings {
-  padding: 8px 15px;
+  padding: 6px 12px;
   border: none;
   color: white;
   cursor: pointer;
   border-radius: 4px;
+  font-size: 12px;
 }
 
 #okSettings { background-color: #4caf50; }

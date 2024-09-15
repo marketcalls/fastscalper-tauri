@@ -10,11 +10,20 @@ let settings = {
   apiKey: '',
   exchange: 'NSE',
   product: 'MIS',
+  voiceAlerts: false,
+  hostUrl: 'http://127.0.0.1:5000',
 };
 
 // Load settings from localStorage if available
 if (localStorage.getItem('fastscalperSettings')) {
   settings = JSON.parse(localStorage.getItem('fastscalperSettings'));
+}
+
+function speakAlert(text) {
+  if (settings.voiceAlerts) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(utterance);
+  }
 }
 
 function trade(action, isEntry) {
@@ -28,7 +37,14 @@ function trade(action, isEntry) {
     api_key: settings.apiKey,
     exchange: settings.exchange,
     product: settings.product,
+    host_url: settings.hostUrl,
   };
+
+  // Voice alerts for button presses
+  if (action === 'BUY' && isEntry) speakAlert("Buy Order");
+  else if (action === 'SELL' && !isEntry) speakAlert("Buy Exit");
+  else if (action === 'SELL' && isEntry) speakAlert("Short Order");
+  else if (action === 'BUY' && !isEntry) speakAlert("Short Exit");
 
   invoke('place_order', { tradeDetails })
     .then((response) => {
@@ -49,6 +65,8 @@ function openSettings() {
   document.getElementById('apiKey').value = settings.apiKey;
   document.getElementById('exchange').value = settings.exchange;
   document.getElementById('product').value = settings.product;
+  document.getElementById('voiceAlerts').checked = settings.voiceAlerts;
+  document.getElementById('hostUrl').value = settings.hostUrl;
 }
 
 function closeSettings() {
@@ -60,6 +78,8 @@ document.getElementById('okSettings').addEventListener('click', () => {
   settings.apiKey = document.getElementById('apiKey').value;
   settings.exchange = document.getElementById('exchange').value;
   settings.product = document.getElementById('product').value;
+  settings.voiceAlerts = document.getElementById('voiceAlerts').checked;
+  settings.hostUrl = document.getElementById('hostUrl').value;
 
   // Save settings to localStorage
   localStorage.setItem('fastscalperSettings', JSON.stringify(settings));

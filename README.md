@@ -1,4 +1,3 @@
-
 # FastScalper
 
 FastScalper is a lightweight, cross-platform desktop application built with [Tauri](https://tauri.app/) and styled using custom CSS. It provides a streamlined interface for placing automated trading orders through the OpenAlgo API.
@@ -20,7 +19,8 @@ FastScalper is a lightweight, cross-platform desktop application built with [Tau
 
 - Simple and intuitive UI for quick trading actions.
 - Supports Long Entry (LE), Long Exit (LX), Short Entry (SE), and Short Exit (SX) operations.
-- Customizable settings for API key, exchange, and product type.
+- Customizable settings for API key, exchange, product type, and host URL.
+- Voice alerts for trade actions (can be enabled/disabled in settings).
 - Persistent settings using local storage.
 - Cross-platform support (Windows, macOS, Linux).
 
@@ -79,7 +79,7 @@ Follow these steps to set up the FastScalper application:
 
 ### OpenAlgo API Setup
 
-Ensure that the OpenAlgo API is running locally or accessible from your machine. The application sends requests to `http://127.0.0.1:5000/api/v1/placesmartorder` by default.
+Ensure that the OpenAlgo API is running and accessible. By default, the application is configured to send requests to `http://127.0.0.1:5000/api/v1/placesmartorder`, but this can be changed in the settings.
 
 ### Tauri Configuration
 
@@ -153,6 +153,8 @@ Click the **Settings** button to configure:
 - **API Key**: Your OpenAlgo API key.
 - **Exchange**: Select the exchange from the dropdown.
 - **Product**: Select the product type (CNC, NRML, MIS).
+- **Host URL**: Set the URL for the OpenAlgo API (default: http://127.0.0.1:5000).
+- **Voice Alerts**: Enable or disable voice alerts for trade actions.
 
 Settings are saved in local storage and persist between sessions.
 
@@ -160,8 +162,23 @@ Settings are saved in local storage and persist between sessions.
 
 1. Enter the **Symbol** and **Quantity**.
 2. Click one of the trading buttons (**LE**, **LX**, **SE**, **SX**).
-3. The application will send a request to the OpenAlgo API.
+3. The application will send a request to the OpenAlgo API at the configured host URL.
 4. An alert will display the response from the API.
+5. If voice alerts are enabled, you'll hear a voice announcement of the action.
+
+### Voice Alerts
+
+FastScalper includes a voice alert feature that announces the trading action when a button is pressed. This feature can be enabled or disabled in the settings modal.
+
+Voice alerts work across all supported platforms (Windows, macOS, and Linux) without any special configuration. The feature uses the Web Speech API, which is supported by modern web browsers and is compatible with Tauri's WebView component.
+
+Voice alert messages:
+- LE button: "Buy Order"
+- LX button: "Buy Exit"
+- SE button: "Short Order"
+- SX button: "Short Exit"
+
+Note: The quality and availability of voices may vary depending on the operating system and installed language packs. Most modern operating systems come with pre-installed voices, but users can add more voices through their system settings if desired.
 
 ## Building the Application
 
@@ -178,7 +195,7 @@ The built application will be located in the `src-tauri/target/release/bundle` d
 - **`src/`**: Contains the frontend code (HTML, CSS, JavaScript).
   - **`index.html`**: The main HTML file.
   - **`styles.css`**: Custom CSS styles.
-  - **`main.js`**: JavaScript logic for the application.
+  - **`main.js`**: JavaScript logic for the application, including voice alerts and API interactions.
 - **`src-tauri/`**: Contains the Rust backend code.
   - **`src/main.rs`**: Rust source code handling API calls.
   - **`tauri.conf.json`**: Tauri configuration file.
@@ -189,6 +206,7 @@ The built application will be located in the `src-tauri/target/release/bundle` d
 ### JavaScript Dependencies
 
 - **Tauri API**: Provides interaction between the frontend and backend.
+- **Web Speech API**: Used for voice alerts (built into modern browsers).
 
 ### Rust Dependencies
 
