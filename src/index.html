@@ -8,22 +8,24 @@
 </head>
 <body>
   <div id="app">
-    <div class="input-container">
-      <div class="input-group">
-        <label for="symbol">Symbol:</label>
-        <input type="text" id="symbol" value="BHEL">
+    <div class="content-wrapper">
+      <div class="input-container">
+        <div class="input-group">
+          <label for="symbol">Symbol:</label>
+          <input type="text" id="symbol" value="BHEL">
+        </div>
+        <div class="input-group">
+          <label for="quantity">Qty:</label>
+          <input type="number" id="quantity" value="1">
+        </div>
+        <button id="settingsButton">⚙️</button>
       </div>
-      <div class="input-group">
-        <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" value="1">
+      <div class="button-group">
+        <button id="leButton">LE</button>
+        <button id="lxButton">LX</button>
+        <button id="seButton">SE</button>
+        <button id="sxButton">SX</button>
       </div>
-      <button id="settingsButton">Settings</button>
-    </div>
-    <div class="button-group">
-      <button id="leButton">LE</button>
-      <button id="lxButton">LX</button>
-      <button id="seButton">SE</button>
-      <button id="sxButton">SX</button>
     </div>
   </div>
 
@@ -31,19 +33,13 @@
     <div class="modal-content">
       <h2>Settings</h2>
       <div class="settings-form">
-        <div class="compact-row">
-          <div class="input-group">
-            <label for="apiKey">API Key:</label>
-            <input type="text" id="apiKey">
-          </div>
-          <div class="input-group">
-            <label for="hostUrl">Host URL:</label>
-            <input type="text" id="hostUrl" placeholder="http://127.0.0.1:5000">
-          </div>
-          <div class="input-group checkbox-group">
-            <input type="checkbox" id="voiceAlerts">
-            <label for="voiceAlerts">Voice Alerts</label>
-          </div>
+        <div class="input-group">
+          <label for="apiKey">API Key:</label>
+          <input type="text" id="apiKey">
+        </div>
+        <div class="input-group">
+          <label for="hostUrl">Host URL:</label>
+          <input type="text" id="hostUrl" placeholder="http://127.0.0.1:5000">
         </div>
         <div class="parallel-inputs">
           <div class="input-group">
@@ -54,6 +50,10 @@
             <label for="product">Product:</label>
             <select id="product"></select>
           </div>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="voiceAlerts">
+          <label for="voiceAlerts">Voice Alerts</label>
         </div>
       </div>
       <div class="settings-buttons">

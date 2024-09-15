@@ -19,9 +19,9 @@
     "windows": [
       {
         "title": "fastscalper",
-        "width": 380,
-        "height": 140,
-        "resizable": false
+        "width": 320,
+        "height": 125,
+        "resizable": true
       }
     ],
     "security": {
@@ -37,6 +37,19 @@
         "icons/128x128@2x.png",
         "icons/icon.icns",
         "icons/icon.ico"
+      ]
+    },
+    "cli": {
+      "description": "FastScalper CLI",
+      "longDescription": "FastScalper CLI for debugging",
+      "beforeHelp": "",
+      "afterHelp": "",
+      "args": [
+        {
+          "name": "debug",
+          "short": "d",
+          "description": "Enable debug logging"
+        }
       ]
     }
   }

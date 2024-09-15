@@ -13,12 +13,21 @@ body, html {
   font-family: Arial, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-size: 14px;
+  font-size: 12px;
+  height: 100%;
 }
 
 #app {
-  width: 380px;
-  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 320px;
+  padding: 8px;
   box-sizing: border-box;
 }
 
@@ -26,39 +35,39 @@ body, html {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  margin-right: 10px;
+  margin-right: 8px;
 }
 
 label {
-  font-size: 12px;
+  font-size: 10px;
   margin-bottom: 2px;
 }
 
 input, select {
-  width: 120px;
-  padding: 4px;
+  width: 100px;
+  padding: 3px;
   background-color: var(--input-bg);
   border: 1px solid var(--input-border);
   color: var(--text-color);
   border-radius: 2px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 #settingsButton {
-  padding: 6px 12px;
+  padding: 3px 6px;
   background-color: var(--button-bg);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   cursor: pointer;
-  font-size: 14px;
-  height: 28px;
+  font-size: 12px;
+  height: 22px;
   align-self: flex-end;
 }
 
@@ -69,16 +78,16 @@ input, select {
 .button-group {
   display: flex;
   justify-content: space-between;
-  gap: 5px;
+  gap: 4px;
 }
 
 .button-group button {
   flex: 1;
-  padding: 10px 0;
+  padding: 8px 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -110,60 +119,41 @@ input, select {
 
 .modal-content {
   background-color: var(--bg-color);
-  padding: 20px;
+  padding: 16px;
   border: 1px solid #888;
-  width: 360px;
+  width: 300px;
   max-width: 90%;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .settings-form {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .settings-form .input-group {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .settings-form label {
   display: block;
   margin-bottom: 2px;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .settings-form input,
 .settings-form select {
   width: 100%;
-  padding: 4px;
-  margin-bottom: 5px;
-  font-size: 12px;
-}
-
-/* Styles for compact row */
-.compact-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.compact-row .input-group {
-  flex: 1;
-  margin-right: 0;
-}
-
-.compact-row input[type="text"],
-.compact-row input[type="url"] {
-  width: 100%;
+  padding: 3px;
+  margin-bottom: 4px;
+  font-size: 11px;
 }
 
 /* Styles for parallel inputs */
 .parallel-inputs {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .parallel-inputs .input-group {
@@ -184,28 +174,28 @@ input, select {
 
 .checkbox-group input[type="checkbox"] {
   width: auto;
-  margin-right: 5px;
+  margin-right: 4px;
 }
 
 .checkbox-group label {
   margin-bottom: 0;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .settings-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 #okSettings, #cancelSettings {
-  padding: 6px 12px;
+  padding: 4px 8px;
   border: none;
   color: white;
   cursor: pointer;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 3px;
+  font-size: 11px;
 }
 
 #okSettings { background-color: #4caf50; }
@@ -213,3 +203,34 @@ input, select {
 
 #okSettings:hover { background-color: #45a049; }
 #cancelSettings:hover { background-color: #da190b; }
+
+/* Responsive adjustments */
+@media (max-width: 320px) {
+  .content-wrapper {
+    padding: 4px;
+  }
+
+  input, select {
+    width: 90px;
+  }
+
+  .button-group button {
+    font-size: 12px;
+    padding: 6px 0;
+  }
+}
+
+@media (min-width: 321px) {
+  .content-wrapper {
+    padding: 12px;
+  }
+
+  input, select {
+    width: 110px;
+  }
+
+  .button-group button {
+    font-size: 16px;
+    padding: 10px 0;
+  }
+}
