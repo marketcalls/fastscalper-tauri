@@ -325,5 +325,3 @@ This will produce an AppImage, a .deb file, and other formats in `src-tauri/targ
 To build for all platforms from a single machine, you'll need to set up cross-compilation environments. This is an advanced topic and requires additional setup. Refer to the [Tauri documentation on Cross-Platform Compilation](https://tauri.app/v1/guides/building/cross-platform) for detailed instructions.
 
 The built applications will be located in the `src-tauri/target/release/bundle` directory, organized by platform.
-
-[... Keep the rest of the existing content ...]
