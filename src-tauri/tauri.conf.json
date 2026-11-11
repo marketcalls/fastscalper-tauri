@@ -1,56 +1,68 @@
 {
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "FastScalper",
+  "version": "../package.json",
+  "identifier": "com.fastscalper.app",
   "build": {
-    "devPath": "../src",
-    "distDir": "../src",
-    "withGlobalTauri": true
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
   },
-  "package": {
-    "productName": "fastscalper",
-    "version": "0.1.0"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      }
-    },
+  "app": {
     "windows": [
       {
-        "title": "fastscalper",
-        "width": 320,
-        "height": 125,
+        "label": "main",
+        "title": "FastScalper",
+        "width": 380,
+        "height": 220,
+        "minWidth": 340,
+        "minHeight": 200,
         "resizable": true
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src ipc: http://ipc.localhost",
+      "devCsp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Finance",
+    "shortDescription": "Compact order pad for OpenAlgo",
+    "longDescription": "FastScalper is a small always-ready window for placing long and short entry and exit market orders through a self-hosted OpenAlgo server.",
+    "copyright": "Copyright (c) marketcalls. MIT License.",
+    "homepage": "https://github.com/marketcalls/fastscalper-tauri",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "signingIdentity": "-"
     },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.fastscalper.app",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
+    "windows": {
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "http://timestamp.digicert.com",
+      "nsis": {
+        "installMode": "currentUser"
+      },
+      "wix": {
+        "upgradeCode": "fe79e516-2efa-53a9-a951-f69e8c9b877d"
+      }
     },
-    "cli": {
-      "description": "FastScalper CLI",
-      "longDescription": "FastScalper CLI for debugging",
-      "beforeHelp": "",
-      "afterHelp": "",
-      "args": [
-        {
-          "name": "debug",
-          "short": "d",
-          "description": "Enable debug logging"
-        }
-      ]
+    "linux": {
+      "deb": {
+        "conflicts": ["fastscalper"],
+        "replaces": ["fastscalper"]
+      },
+      "rpm": {
+        "obsoletes": ["fastscalper"]
+      }
     }
   }
 }

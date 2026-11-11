@@ -1,0 +1,6 @@
+# Pins the Rust toolchain for local builds and CI so everyone compiles with
+# the same compiler. Bump deliberately, together with Cargo.lock.
+[toolchain]
+channel = "1.99.1"
+components = ["rustfmt", "clippy"]
+profile = "minimal"
