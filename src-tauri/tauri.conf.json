@@ -14,10 +14,10 @@
       {
         "label": "main",
         "title": "FastScalper",
-        "width": 380,
-        "height": 220,
-        "minWidth": 340,
-        "minHeight": 200,
+        "width": 320,
+        "height": 125,
+        "minWidth": 300,
+        "minHeight": 115,
         "resizable": true
       }
     ],
