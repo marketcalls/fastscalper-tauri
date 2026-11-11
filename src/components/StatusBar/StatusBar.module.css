@@ -1,0 +1,31 @@
+/* A single line: never taller than this, so the buttons never move. */
+.line {
+  height: var(--status-line-height);
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--status-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: text;
+}
+
+.idle {
+  color: var(--color-text-muted);
+}
+
+.info {
+  color: var(--color-text);
+}
+
+.success {
+  color: var(--color-success);
+}
+
+.warning {
+  color: var(--color-warning);
+}
+
+.error {
+  color: var(--color-danger);
+}

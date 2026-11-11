@@ -1,0 +1,83 @@
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 0;
+  height: var(--trade-button-height);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+  transition:
+    background-color var(--duration-fast),
+    filter var(--duration-fast);
+}
+
+/* Each side sets its colours; the entry and exit treatments below use them. */
+.long {
+  --side-fill: var(--color-long);
+  --side-outline: var(--color-long-outline);
+  --side-tint: var(--color-long-tint);
+}
+
+.short {
+  --side-fill: var(--color-short);
+  --side-outline: var(--color-short-outline);
+  --side-tint: var(--color-short-tint);
+}
+
+.entry {
+  background: var(--side-fill);
+  border: var(--exit-border-width) solid var(--side-fill);
+  color: var(--color-on-trade);
+}
+
+.entry:hover:not(:disabled, .pending) {
+  filter: brightness(1.12);
+}
+
+.exit {
+  background: transparent;
+  border: var(--exit-border-width) solid var(--side-outline);
+  color: var(--side-outline);
+}
+
+.exit:hover:not(:disabled, .pending) {
+  background: var(--side-tint);
+}
+
+.button:active:not(:disabled, .pending) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.45;
+}
+
+.pending {
+  cursor: progress;
+}
+
+.spinner {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}

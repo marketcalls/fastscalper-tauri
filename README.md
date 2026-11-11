@@ -1,327 +1,125 @@
 # FastScalper
 
-FastScalper is a lightweight, cross-platform desktop application built with [Tauri](https://tauri.app/) and styled using custom CSS. It provides a streamlined interface for placing automated trading orders through the OpenAlgo API.
+FastScalper is a compact desktop order pad for scalping through your own [OpenAlgo](https://github.com/marketcalls/openalgo) server. It is one small window with a symbol, a quantity and four buttons, so an entry or an exit is always one click away.
 
-![FastScalper Screenshot](./screenshot.png)
+![FastScalper](./screenshot.png)
 
-## Table of Contents
+## Download
 
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Building the Application](#building-the-application)
-- [Contributing](#contributing)
-- [License](#license)
+Get the installer for your system from the [latest release](https://github.com/marketcalls/fastscalper-tauri/releases/latest). The release notes explain which file to pick and how to open an unsigned build the first time.
 
-## Features
+| System | File to download |
+| --- | --- |
+| Windows 10 and 11 (x64) | `FastScalper_<version>_x64-setup.exe` (or the `.msi` for managed installs) |
+| macOS with Apple Silicon | `FastScalper_<version>_aarch64.dmg` |
+| macOS with an Intel processor | `FastScalper_<version>_x64.dmg` |
+| Ubuntu, Debian, Linux Mint | `FastScalper_<version>_amd64.deb` (or `arm64.deb`) |
+| Fedora, RHEL, openSUSE | `FastScalper-<version>-1.x86_64.rpm` (or `aarch64.rpm`) |
+| Any other Linux | `FastScalper_<version>_amd64.AppImage` (or `aarch64.AppImage`) |
 
-- Simple and intuitive UI for quick trading actions.
-- Supports Long Entry (LE), Long Exit (LX), Short Entry (SE), and Short Exit (SX) operations.
-- Customizable settings for API key, exchange, product type, and host URL.
-- Voice alerts for trade actions (can be enabled/disabled in settings).
-- Persistent settings using local storage.
-- Cross-platform support (Windows, macOS, Linux).
+## Using FastScalper
 
-## Prerequisites
+1. Start OpenAlgo and copy your API key from its dashboard.
+2. Open FastScalper. Settings opens on first launch: enter the API key and the host URL (default `http://127.0.0.1:5000`), click **Test** next to the host URL to check the connection, then **Save**.
+3. Type a symbol and a quantity, then use the buttons.
 
-Before you begin, ensure you have met the following requirements:
+| Button | Meaning | Order sent to OpenAlgo |
+| --- | --- | --- |
+| LE | Long entry | BUY, your quantity |
+| LX | Long exit | SELL, quantity 0 (OpenAlgo closes the open position) |
+| SE | Short entry | SELL, your quantity |
+| SX | Short exit | BUY, quantity 0 (OpenAlgo closes the open position) |
 
-- **Node.js** (version 14 or later)
-- **npm** (Node Package Manager)
-- **Rust** and **Cargo** (Rust's package manager)
-- **Tauri CLI** (Command Line Interface)
+Every order is a MARKET smart order (`/api/v1/placesmartorder`) tagged with the strategy name `FastScalper`. The line under the buttons shows the order id or the server message.
 
-### Installing Rust and Cargo
+Safety behaviour worth knowing:
 
-Install Rust and Cargo by running:
+- Clicking the same button again while its order is in flight does nothing, but an exit is never held back by a pending entry.
+- If the network fails mid-order, FastScalper never retries. The order may still have reached your broker, so check the order book first.
+- No keyboard shortcut places an order.
 
-```bash
-# On Unix/Linux/macOS
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+### Settings
 
-# On Windows, use the MSI installer from:
-# https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe
-```
+| Setting | Default | Notes |
+| --- | --- | --- |
+| API key | empty | Required before any order is sent. |
+| Host URL | `http://127.0.0.1:5000` | Where OpenAlgo runs. |
+| Exchange | NSE | NSE, NFO, CDS, BSE, BFO, BCD, MCX, NCDEX |
+| Product | MIS | CNC, NRML, MIS |
+| Voice alerts | off | Speaks "Buy Order", "Buy Exit", "Short Order" or "Short Exit". |
+| Always on top | off | Keeps the pad above your charts. |
 
-### Installing Tauri CLI
+Settings are saved in `settings.json` in the app config folder, which you can also edit by hand while the app is closed:
 
-After installing Rust and Cargo, install the Tauri CLI:
+| System | Location |
+| --- | --- |
+| Windows | `%APPDATA%\com.fastscalper.app\settings.json` |
+| macOS | `~/Library/Application Support/com.fastscalper.app/settings.json` |
+| Linux | `~/.config/com.fastscalper.app/settings.json` |
 
-```bash
-cargo install tauri-cli
-```
+Upgrading from 0.1.0: FastScalper imports your old settings on first launch when it can find them. If Settings opens empty, enter them once.
 
-## Installation
+## Development
 
-Follow these steps to set up the FastScalper application:
+### Prerequisites
 
-1. **Clone the Repository**
+- Node.js 24 (see `.nvmrc`; 22.22.2 or later also works)
+- Rust through [rustup](https://rustup.rs). The exact toolchain (1.99.1) is pinned in `rust-toolchain.toml` and installs itself on first build.
+- The Tauri system dependencies for your OS: [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/)
 
-   ```bash
-   git clone https://github.com/marketcalls/fastscalper-tauri.git
-   ```
-
-2. **Navigate to the Project Directory**
-
-   ```bash
-   cd fastscalper-tauri
-   ```
-
-3. **Install Dependencies**
-
-   ```bash
-   npm install
-   ```
-
-## Configuration
-
-### OpenAlgo API Setup
-
-Ensure that the OpenAlgo API is running and accessible. By default, the application is configured to send requests to `http://127.0.0.1:5000/api/v1/placesmartorder`, but this can be changed in the settings.
-
-### Tauri Configuration
-
-The `tauri.conf.json` file contains configuration settings for the Tauri application. Key settings include window size, title, and bundle identifiers.
-
-**Example `tauri.conf.json`:**
-
-```json
-{
-  "build": {
-    "withGlobalTauri": true
-  },
-  "package": {
-    "productName": "FastScalper",
-    "version": "0.1.0"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": false
-    },
-    "windows": [
-      {
-        "title": "FastScalper",
-        "width": 380,
-        "height": 300,
-        "resizable": false
-      }
-    ],
-    "security": {
-      "csp": null
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.fastscalper.app",
-      "icon": [
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    }
-  }
-}
-```
-
-## Usage
-
-### Running the Application in Development Mode
-
-To start the application in development mode with hot-reloading:
+### Common commands
 
 ```bash
-npm run tauri dev
+npm install            # install frontend dependencies
+npm run tauri dev      # run the app with live reload
+npm run tauri build    # build installers into src-tauri/target/release/bundle
 ```
 
-### Application Interface
+| Check | Frontend (repo root) | Backend (`src-tauri`) |
+| --- | --- | --- |
+| Lint | `npm run lint` | `cargo clippy --all-targets -- -D warnings` |
+| Format | `npm run format:check` | `cargo fmt --check` |
+| Types | `npm run typecheck` | (compiler) |
+| Tests | `npm test` or `npm run test:coverage` | `cargo test` |
 
-- **Symbol**: Enter the trading symbol (e.g., "BHEL").
-- **Quantity**: Enter the quantity for the trade.
+No test talks to a real OpenAlgo server or broker. Frontend tests fake the Tauri IPC layer; backend tests run against a local mock HTTP server and Tauri's mock runtime.
 
-#### Trading Buttons
+### How it fits together
 
-- **LE (Long Entry)**: Place a buy order with the specified quantity.
-- **LX (Long Exit)**: Close a long position (sell order with zero quantity).
-- **SE (Short Entry)**: Place a sell order with the specified quantity.
-- **SX (Short Exit)**: Close a short position (buy order with zero quantity).
-
-#### Settings
-
-Click the **Settings** button to configure:
-
-- **API Key**: Your OpenAlgo API key.
-- **Exchange**: Select the exchange from the dropdown.
-- **Product**: Select the product type (CNC, NRML, MIS).
-- **Host URL**: Set the URL for the OpenAlgo API (default: http://127.0.0.1:5000).
-- **Voice Alerts**: Enable or disable voice alerts for trade actions.
-
-Settings are saved in local storage and persist between sessions.
-
-### Placing an Order
-
-1. Enter the **Symbol** and **Quantity**.
-2. Click one of the trading buttons (**LE**, **LX**, **SE**, **SX**).
-3. The application will send a request to the OpenAlgo API at the configured host URL.
-4. An alert will display the response from the API.
-5. If voice alerts are enabled, you'll hear a voice announcement of the action.
-
-### Voice Alerts
-
-FastScalper includes a voice alert feature that announces the trading action when a button is pressed. This feature can be enabled or disabled in the settings modal.
-
-Voice alerts work across all supported platforms (Windows, macOS, and Linux) without any special configuration. The feature uses the Web Speech API, which is supported by modern web browsers and is compatible with Tauri's WebView component.
-
-Voice alert messages:
-- LE button: "Buy Order"
-- LX button: "Buy Exit"
-- SE button: "Short Order"
-- SX button: "Short Exit"
-
-Note: The quality and availability of voices may vary depending on the operating system and installed language packs. Most modern operating systems come with pre-installed voices, but users can add more voices through their system settings if desired.
-
-## Building the Application
-
-To build the application for distribution:
-
-```bash
-npm run tauri build
+```
+React UI (src/)  --invoke-->  Tauri commands (src-tauri/src/commands.rs)
+                                   |
+                                   v
+                              OpenAlgo client (src-tauri/src/openalgo/)  --HTTP-->  OpenAlgo server
 ```
 
-The built application will be located in the `src-tauri/target/release/bundle` directory, organized by platform.
+The webview never makes network calls itself. It calls two commands, `place_order` and `test_connection`; the Rust side validates input, sends the request and returns either a result or a typed error (`validation`, `network`, `api` or `decode`). The contract is defined once on each side: `src/api/types.ts` and `src-tauri/src/openalgo/models.rs`.
 
-## Project Structure
-
-- **`src/`**: Contains the frontend code (HTML, CSS, JavaScript).
-  - **`index.html`**: The main HTML file.
-  - **`styles.css`**: Custom CSS styles.
-  - **`main.js`**: JavaScript logic for the application, including voice alerts and API interactions.
-- **`src-tauri/`**: Contains the Rust backend code.
-  - **`src/main.rs`**: Rust source code handling API calls.
-  - **`tauri.conf.json`**: Tauri configuration file.
-  - **`Cargo.toml`**: Rust dependencies configuration.
-
-## Dependencies
-
-### JavaScript Dependencies
-
-- **Tauri API**: Provides interaction between the frontend and backend.
-- **Web Speech API**: Used for voice alerts (built into modern browsers).
-
-### Rust Dependencies
-
-- **tauri**: The core Tauri library.
-- **serde**: For serialization and deserialization of data.
-- **serde_json**: For handling JSON data.
-- **reqwest**: For making HTTP requests.
-- **tokio**: Asynchronous runtime for Rust.
-
-**Cargo.toml Dependencies:**
-
-```toml
-[dependencies]
-tauri = { version = "1", features = ["api-all"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-reqwest = { version = "0.11", features = ["json", "default-tls"] }
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 ```
+src/
+  api/          typed wrappers for the Tauri commands
+  components/   OrderPad, StatusBar, SettingsDialog and small building blocks
+  settings/     settings type, defaults, validation, versioned storage
+  trading/      button-to-order mapping, order placement hook
+  feedback/     status messages and error descriptions
+  lib/          speech, window size and always-on-top helpers
+  styles/       design tokens and global styles
+src-tauri/
+  src/          commands, error type, OpenAlgo client and reply parsing
+  tests/        IPC tests through Tauri's mock runtime
+  capabilities/ permissions granted to the window
+```
+
+## Continuous integration and releases
+
+Every pull request and push to `master` runs lint, format, type, test and build checks for the frontend, and fmt, clippy and tests for the backend on Linux, Windows and macOS (`.github/workflows/ci.yml`).
+
+Pushing a version tag such as `v0.1.1` builds installers for every platform above and publishes a GitHub release (`.github/workflows/release.yml`). See [docs/RELEASING.md](docs/RELEASING.md) for the full checklist and for adding code signing later.
 
 ## Contributing
 
-Contributions are welcome! Please follow these steps:
-
-1. **Fork the Repository**
-
-   Click on the "Fork" button in the top right corner of the repository page.
-
-2. **Create a Feature Branch**
-
-   ```bash
-   git checkout -b feature/YourFeatureName
-   ```
-
-3. **Commit Your Changes**
-
-   ```bash
-   git commit -m "Add your feature"
-   ```
-
-4. **Push to Your Fork**
-
-   ```bash
-   git push origin feature/YourFeatureName
-   ```
-
-5. **Create a Pull Request**
-
-   Go to the original repository and click on "Pull Requests" to submit your PR.
+Fork the repository, create a branch, make sure the checks above pass, and open a pull request.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
-## Acknowledgments
-
-- [Tauri](https://tauri.app/) for providing the framework to build cross-platform desktop applications.
-- [OpenAlgo](https://github.com/marketcalls/openalgo) for the trading API.
-- All contributors and the open-source community.
-
-## Contact
-
-For support or inquiries, please open an issue on the [GitHub repository](https://github.com/marketcalls/fastscalper-tauri/issues).
-
-## Building the Application
-
-FastScalper can be built for Windows, macOS, and Linux. Follow these instructions to build for your target platform:
-
-### Prerequisites for Cross-Platform Building
-
-- Ensure you have Rust and Node.js installed on your development machine.
-- Install platform-specific dependencies as needed (see below).
-
-### Building for macOS
-
-1. Ensure you're on a macOS machine with Xcode installed.
-2. Run the build command:
-
-```bash
-npm run tauri build
-```
-
-This will produce a `.dmg` file in `src-tauri/target/release/bundle/dmg/`.
-
-### Building for Windows
-
-1. On a Windows machine with Visual Studio build tools installed, run:
-
-```bash
-npm run tauri build
-```
-
-This will produce a `.msi` installer in `src-tauri/target/release/bundle/msi/`.
-
-To build for Windows on a non-Windows machine, you'll need to set up cross-compilation tools. Refer to the [Tauri documentation](https://tauri.app/v1/guides/building/cross-platform) for detailed instructions.
-
-### Building for Linux
-
-1. On a Linux machine, ensure you have the necessary dependencies installed. For Ubuntu/Debian:
-
-```bash
-sudo apt update
-sudo apt install libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
-```
-
-2. Run the build command:
-
-```bash
-npm run tauri build
-```
-
-This will produce an AppImage, a .deb file, and other formats in `src-tauri/target/release/bundle/`.
-
-### Universal Build (All Platforms)
-
-To build for all platforms from a single machine, you'll need to set up cross-compilation environments. This is an advanced topic and requires additional setup. Refer to the [Tauri documentation on Cross-Platform Compilation](https://tauri.app/v1/guides/building/cross-platform) for detailed instructions.
-
-The built applications will be located in the `src-tauri/target/release/bundle` directory, organized by platform.
+[MIT](LICENSE)

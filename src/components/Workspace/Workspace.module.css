@@ -1,0 +1,13 @@
+/*
+ * Fits the 320 by 125 window (and the 300 by 115 minimum) without scrolling:
+ * 6 padding + 38 inputs + 6 + 30 buttons + 6 + 18 status + 6 padding = 110.
+ * Any extra height is shared above and below.
+ */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-3) var(--space-4);
+}

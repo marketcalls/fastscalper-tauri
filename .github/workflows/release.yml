@@ -1,0 +1,243 @@
+# Builds FastScalper for every platform and publishes a GitHub Release.
+# The full procedure is in docs/RELEASING.md.
+#
+#   verify          tag must equal v<package.json version>, fail early otherwise
+#   create-release  one draft release with notes from .github/release-notes.md
+#   build           one job per platform, each uploads its installers to the draft
+#   publish         runs only after every build succeeded, then makes the draft public
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to build and release, for example v0.1.1
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Never run two releases of the same tag at once, and never cancel one halfway.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  # The pushed tag, or the tag typed in when the workflow is started by hand.
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  verify:
+    name: Verify tag and version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+      - name: Check the tag against package.json, Cargo.toml and lock files
+        id: version
+        run: |
+          node scripts/check-version.mjs --tag "$TAG"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+  create-release:
+    name: Create draft release
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      release-id: ${{ steps.draft.outputs.id }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+      # Re-running the workflow reuses the draft from the earlier attempt, and
+      # the build jobs replace any assets it already has.
+      - name: Create the draft, or reuse it on a re-run
+        id: draft
+        run: |
+          is_draft=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null || true)
+          if [ "$is_draft" = "false" ]; then
+            echo "::error::Release $TAG is already published. Bump the version and push a new tag."
+            exit 1
+          elif [ "$is_draft" = "true" ]; then
+            echo "Reusing the existing draft release for $TAG."
+          else
+            sed "s/{{VERSION}}/$VERSION/g" .github/release-notes.md > "$RUNNER_TEMP/notes.md"
+            # --generate-notes appends the merged changes and the full changelog link.
+            gh release create "$TAG" --draft --verify-tag \
+              --title "FastScalper $VERSION" \
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              --generate-notes
+          fi
+          echo "id=$(gh release view "$TAG" --json databaseId --jq .databaseId)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.name }}
+    needs: create-release
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      # Let the other platforms finish, so a failed one can be re-run on its own.
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS Apple Silicon
+            runner: macos-latest
+            target: aarch64-apple-darwin
+          - name: macOS Intel
+            # Native Intel runner. When GitHub retires Intel runners, use
+            # macos-latest here: --target already makes that a cross-compile.
+            runner: macos-26-intel
+            target: x86_64-apple-darwin
+          - name: Windows x64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+          # Ubuntu 22.04 has an older glibc than newer images, so the Linux
+          # builds also run on older distributions.
+          - name: Linux x64
+            runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - name: Linux arm64
+            runner: ubuntu-22.04-arm
+            target: aarch64-unknown-linux-gnu
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+
+      - uses: ./.github/actions/setup-rust
+        with:
+          target: ${{ matrix.target }}
+          # A cache saved under one tag cannot be restored by the next tag,
+          # so release builds always start clean.
+          cache: "false"
+
+      # Signing is optional. Without these secrets the app keeps the ad-hoc
+      # signature from bundle.macOS.signingIdentity ("-"), which Apple Silicon
+      # needs to launch it at all.
+      - name: Load macOS signing secrets if configured
+        if: runner.os == 'macOS'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -z "$APPLE_CERTIFICATE" ]; then
+            echo "::notice::No macOS signing secrets: building with an ad-hoc signature."
+            exit 0
+          fi
+          if [ -z "$APPLE_CERTIFICATE_PASSWORD" ] || [ -z "$APPLE_SIGNING_IDENTITY" ]; then
+            echo "::error::APPLE_CERTIFICATE also needs APPLE_CERTIFICATE_PASSWORD and APPLE_SIGNING_IDENTITY."
+            exit 1
+          fi
+          # Pass on only the secrets that are set: Tauri treats an empty variable
+          # as configured and fails. APPLE_ID, APPLE_PASSWORD and APPLE_TEAM_ID
+          # together also turn on notarization.
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY \
+                      APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            if [ -n "${!name}" ]; then
+              delimiter="EOF_$(openssl rand -hex 16)"
+              printf '%s<<%s\n%s\n%s\n' "$name" "$delimiter" "${!name}" "$delimiter" >> "$GITHUB_ENV"
+            fi
+          done
+
+      # Tauri signs with signtool when bundle.windows.certificateThumbprint is
+      # set, so the thumbprint is merged into the config for this build only.
+      - name: Import Windows signing certificate if configured
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          if (-not $env:WINDOWS_CERTIFICATE) {
+            Write-Output "::notice::No Windows signing secrets: building unsigned installers."
+            exit 0
+          }
+          $pfx = Join-Path $env:RUNNER_TEMP 'signing.pfx'
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
+          $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:\CurrentUser\My -Password $password |
+            Where-Object HasPrivateKey | Select-Object -First 1
+          Remove-Item $pfx
+          if (-not $cert) { throw 'WINDOWS_CERTIFICATE contains no certificate with a private key.' }
+          $config = Join-Path $env:RUNNER_TEMP 'windows-signing.json'
+          @{ bundle = @{ windows = @{ certificateThumbprint = $cert.Thumbprint } } } |
+            ConvertTo-Json -Depth 4 | Set-Content -Path $config -Encoding utf8
+          Add-Content -Path $env:GITHUB_ENV -Value "WINDOWS_SIGNING_ARGS=--config $($config.Replace('\', '/'))"
+
+      - name: Build and upload to the draft release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          releaseId: ${{ needs.create-release.outputs.release-id }}
+          # WINDOWS_SIGNING_ARGS is empty unless the step above set it.
+          args: --target ${{ matrix.target }} ${{ env.WINDOWS_SIGNING_ARGS }}
+          # No auto-updater is configured, so there is no latest.json to upload.
+          uploadUpdaterJson: false
+          # Retry once: dmg creation and asset uploads are occasionally flaky on hosted runners.
+          retryAttempts: 1
+
+  publish:
+    name: Publish release
+    needs: [verify, create-release, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.verify.outputs.version }}
+      RELEASE_ID: ${{ needs.create-release.outputs.release-id }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+      # Every file name the notes tell people to download, written in its own
+      # code span, must be attached before the release goes public.
+      - name: Check that every file named in the release notes was uploaded
+        run: |
+          # shellcheck disable=SC2016 # the backticks are literal Markdown, not command substitution
+          sed "s/{{VERSION}}/$VERSION/g" .github/release-notes.md \
+            | grep -oE '`FastScalper[^`]*`' | tr -d '`' | sort -u > "$RUNNER_TEMP/expected.txt"
+          gh api "repos/$GH_REPO/releases/$RELEASE_ID/assets" --paginate --jq '.[].name' \
+            > "$RUNNER_TEMP/uploaded.txt"
+          missing=$(grep -vxFf "$RUNNER_TEMP/uploaded.txt" "$RUNNER_TEMP/expected.txt" || true)
+          if [ -n "$missing" ]; then
+            echo "::error::Named in the release notes but not uploaded: $(echo "$missing" | tr '\n' ' ')"
+            exit 1
+          fi
+          echo "All $(wc -l < "$RUNNER_TEMP/expected.txt") files named in the release notes are attached."
+      - name: Publish the draft
+        run: gh api --method PATCH "repos/$GH_REPO/releases/$RELEASE_ID" -F draft=false --silent

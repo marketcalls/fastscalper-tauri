@@ -1,20 +1,56 @@
 [package]
 name = "fastscalper"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-edition = "2021"
+version = "0.1.1"
+description = "Compact desktop order pad for scalping through the OpenAlgo API"
+authors = ["marketcalls"]
+license = "MIT"
+repository = "https://github.com/marketcalls/fastscalper-tauri"
+edition = "2024"
+publish = false
+
+[lib]
+# Distinct from the binary name to avoid output file collisions on Windows.
+name = "fastscalper_lib"
 
 [build-dependencies]
-tauri-build = { version = "1", features = [] }
+tauri-build = { version = "2.7", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [ "cli", "shell-open"] }
+tauri = { version = "2.12", features = [] }
+tauri-plugin-store = "2.5"
+reqwest = { version = "0.13", features = ["json"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-reqwest = { version = "0.11", features = ["json", "default-tls"] }
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+thiserror = "2"
 
-[features]
-# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
-custom-protocol = ["tauri/custom-protocol"]
+[dev-dependencies]
+# `test` enables Tauri's mock runtime for IPC-level command tests.
+tauri = { version = "2.12", features = ["test"] }
+tokio = { version = "1.54", features = ["macros", "rt"] }
+wiremock = "0.6.5"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+# Stray debug output could leak an API key.
+dbg_macro = "warn"
+print_stdout = "warn"
+print_stderr = "warn"
+# No placeholders in code that places real orders.
+todo = "warn"
+unimplemented = "warn"
+# Pedantic lints picked for readability. The whole group is mostly noise here.
+manual_let_else = "warn"
+match_same_arms = "warn"
+redundant_closure_for_method_calls = "warn"
+semicolon_if_nothing_returned = "warn"
+
+# Smaller, faster release binaries: https://v2.tauri.app/concept/size/
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
