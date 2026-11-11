@@ -1,0 +1,68 @@
+.pad {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ticket {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.symbol {
+  flex: 1;
+}
+
+.label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 12px;
+}
+
+.input {
+  width: 100%;
+  height: var(--control-height);
+  padding: 0 var(--space-3);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+  font-weight: normal;
+}
+
+.quantity {
+  width: 64px;
+  text-align: right;
+}
+
+/* Draws the eye to Settings while no API key is configured. */
+.needsAttention {
+  border-color: var(--color-accent);
+  color: var(--color-focus);
+}
+
+/* Four buttons in one row; a wider gap separates long from short. */
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}

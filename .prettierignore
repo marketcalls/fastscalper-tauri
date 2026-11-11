@@ -1,0 +1,8 @@
+# Owned by other workstreams or generated. Prettier formats the frontend only.
+src-tauri
+.github
+dist
+coverage
+*.md
+package-lock.json
+.vscode

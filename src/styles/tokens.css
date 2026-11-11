@@ -1,0 +1,84 @@
+/*
+ * Design tokens. Every colour, size and radius used by component styles is
+ * defined here. Dark is the default; light applies when the OS asks for it.
+ * Text colours meet WCAG AA (4.5:1) against the surfaces they sit on.
+ */
+:root {
+  color-scheme: dark;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Compact, like v0.1.0: the main window is only 320 by 125. */
+  --font-size-xs: 10px;
+  --font-size-sm: 11px;
+  --font-size-md: 12px;
+  --font-size-lg: 13px;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 12px;
+  --space-6: 16px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --border-width: 1px;
+  --exit-border-width: 2px;
+  --focus-ring: 2px solid var(--color-focus);
+
+  --control-height: 24px;
+  --trade-button-height: 30px;
+  --status-line-height: 18px;
+  --duration-fast: 120ms;
+
+  --color-bg: #111418;
+  --color-surface: #1a1f25;
+  --color-surface-hover: #242a32;
+  --color-border: #5b6573;
+  --color-text: #e6e9ed;
+  --color-text-muted: #9ba5b1;
+  --color-focus: #6cb4ff;
+
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-on-accent: #ffffff;
+
+  /* Entries are filled with the side colour; exits are outlined in it. */
+  --color-long: #15803d;
+  --color-long-outline: #4ade80;
+  --color-long-tint: rgb(74 222 128 / 12%);
+  --color-short: #c81e1e;
+  --color-short-outline: #f87171;
+  --color-short-tint: rgb(248 113 113 / 12%);
+  --color-on-trade: #ffffff;
+
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --color-bg: #f5f6f8;
+    --color-surface: #ffffff;
+    --color-surface-hover: #eceef2;
+    --color-border: #7c8796;
+    --color-text: #15191e;
+    --color-text-muted: #545d68;
+    --color-focus: #1d4ed8;
+
+    --color-long-outline: #15803d;
+    --color-long-tint: rgb(21 128 61 / 10%);
+    --color-short: #b91c1c;
+    --color-short-outline: #b91c1c;
+    --color-short-tint: rgb(185 28 28 / 8%);
+
+    --color-success: #15803d;
+    --color-warning: #92400e;
+    --color-danger: #b91c1c;
+  }
+}
