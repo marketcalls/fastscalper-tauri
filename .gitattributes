@@ -1,0 +1,7 @@
+# Check out text files with LF on every OS so formatters (Prettier, rustfmt)
+# and CI see identical bytes, even where Git is set to convert to CRLF.
+* text=auto eol=lf
+
+*.png binary
+*.ico binary
+*.icns binary

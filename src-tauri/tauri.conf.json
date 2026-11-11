@@ -18,7 +18,8 @@
         "height": 125,
         "minWidth": 300,
         "minHeight": 115,
-        "resizable": true
+        "resizable": true,
+        "useHttpsScheme": true
       }
     ],
     "security": {

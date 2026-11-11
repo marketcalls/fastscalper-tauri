@@ -56,4 +56,4 @@ These builds are not yet signed with an Apple or Microsoft developer certificate
 
 ## Upgrading from 0.1.0
 
-Settings are stored in a new place, so FastScalper starts with empty settings after the upgrade. Open Settings and enter your OpenAlgo host URL and API key again, and check the exchange, product and voice alert options before placing an order.
+Settings now live in a `settings.json` file in the app config folder. On first launch FastScalper imports your 0.1.0 settings when it can find them. If Settings opens empty, enter your OpenAlgo host URL and API key once. Either way, check the exchange, product and voice alert options before placing an order.
