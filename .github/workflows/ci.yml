@@ -1,0 +1,129 @@
+# Checks every pull request and every push to master.
+#
+# FastScalper places real orders, so nothing here talks to an OpenAlgo server
+# or a broker and no secrets are used: frontend tests mock the Tauri bridge and
+# Rust tests use a local wiremock server only.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run per pull request or branch. A new push to a pull request cancels the
+# outdated run; runs on master are never cancelled, so every commit gets a result.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  versions:
+    name: Version consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # The runner's preinstalled Node is enough: the script has no dependencies.
+      - name: Compare package.json, Cargo.toml and lock files
+        run: node scripts/check-version.mjs
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Check formatting
+        run: npm run format:check
+      - name: Type check
+        run: npm run typecheck
+      - name: Unit tests with coverage
+        run: npm run test:coverage
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-coverage
+          path: coverage/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Build
+        run: npm run build
+
+  rust-fmt:
+    name: Rust format
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install Rust toolchain from rust-toolchain.toml
+        run: rustup toolchain install
+      - name: cargo fmt
+        working-directory: src-tauri
+        run: cargo fmt --all --check
+
+  rust:
+    name: Rust (${{ matrix.os }})
+    strategy:
+      # Let every OS finish so one failure does not hide another.
+      fail-fast: false
+      matrix:
+        # ubuntu-22.04 is also the Linux release build host.
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: src-tauri
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+      # Debug builds do not embed the frontend because devUrl is set in
+      # tauri.conf.json, so these steps do not need ../dist to exist.
+      - name: Clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --locked
+
+  tauri-build:
+    name: Tauri debug build (Linux)
+    # Covers what clippy and the tests skip: the Tauri CLI, beforeBuildCommand,
+    # embedding dist/ in the binary, and the deb and rpm bundle settings.
+    # AppImage is left to the release workflow because it downloads extra tools.
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - uses: ./.github/actions/setup-rust
+      - name: Build debug app with deb and rpm packages
+        run: npx tauri build --debug --bundles deb,rpm

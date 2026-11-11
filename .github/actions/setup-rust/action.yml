@@ -1,0 +1,54 @@
+# Shared Rust setup for every job that compiles the Tauri app (CI and release).
+# Call it after actions/checkout so rust-toolchain.toml is present.
+name: Set up Rust for Tauri
+description: >-
+  Installs the Linux system libraries Tauri needs, the Rust toolchain pinned in
+  rust-toolchain.toml, an optional extra target, and optionally a cargo cache.
+
+inputs:
+  target:
+    description: Extra Rust target triple to install, for example x86_64-apple-darwin.
+    required: false
+    default: ""
+  cache:
+    description: Restore and save the cargo cache for src-tauri ("true" or "false").
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    # Tauri 2 prerequisites from https://v2.tauri.app/start/prerequisites/
+    # plus patchelf and xdg-utils, which the AppImage bundler uses.
+    - name: Install Linux system libraries
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential curl wget file \
+          libwebkit2gtk-4.1-dev libxdo-dev libssl-dev \
+          libayatana-appindicator3-dev librsvg2-dev \
+          patchelf xdg-utils
+
+    # With no arguments, rustup installs the channel and components named in
+    # rust-toolchain.toml, so the version lives in exactly one place.
+    - name: Install Rust toolchain
+      shell: bash
+      env:
+        TARGET: ${{ inputs.target }}
+      run: |
+        rustup toolchain install
+        if [ -n "$TARGET" ]; then
+          rustup target add "$TARGET"
+        fi
+        rustc --version
+
+    - name: Cache cargo registry and build output
+      if: inputs.cache == 'true'
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: src-tauri
+        # Pull requests restore the master cache but do not save their own,
+        # which keeps the repository cache quota for the shared baseline.
+        save-if: ${{ github.ref == 'refs/heads/master' }}
